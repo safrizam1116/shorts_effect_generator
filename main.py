@@ -17,7 +17,7 @@ def cut_video(source_path, output_path, start_time, duration):
             "ffmpeg",
             "-nostdin",
             "-hide_banner",
-            "-loglevel", "error",
+            "-loglevel", "info",
             "-ss", str(start_time),
             "-i", source_path,
             "-t", str(duration),
@@ -29,8 +29,8 @@ def cut_video(source_path, output_path, start_time, duration):
             "-y",
             output_path
         ]
-        subprocess.run(command, check=True)
-        return True
+        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     except subprocess.CalledProcessError as e:
         print(f"[ERROR] FFmpeg gagal: {e}")
         return False
