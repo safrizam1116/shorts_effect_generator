@@ -8,51 +8,45 @@ import threading
 INPUT_PATH = "input/source.mp4"
 OUTPUT_PATH = "output/clip.mp4"
 LOG_PATH = "logs/uploaded.json"
-output_file = os.path.abspath("output/clip.mp4")
 CLIP_DURATION = 28  # detik
 os.makedirs("output", exist_ok=True)
+
 # ==== Fungsi potong video ====
 def cut_video(source_path, output_path, start_time, duration):
     try:
         command = [
-            "ffmpeg", "-y", "-i", input_file,
-    "-t", "28",  # potong 28 detik pertama (bisa disesuaikan)
-    "-vf", "scale=1440:2560",  # pastikan resolusi 9:16
-    output_file
+            "ffmpeg",
+            "-y",
             "-nostdin",
             "-hide_banner",
-            "-loglevel", "info",      # UBAH dari "error" → "info"
+            "-loglevel", "info",
             "-ss", str(start_time),
             "-i", source_path,
             "-t", str(duration),
+            "-vf", "scale=1440:2560",
             "-c:v", "libx264",
             "-preset", "ultrafast",
             "-crf", "32",
             "-c:a", "aac",
             "-b:a", "64k",
-            "-y",
             output_path
         ]
+
         print(f"[DEBUG] Menjalankan ffmpeg: {' '.join(command)}")
         result = subprocess.run(command, check=True, capture_output=True, text=True)
-        # CEK apakah file berhasil dibuat
-if os.path.exists(output_file):
-    print("[SUCCESS] Output video berhasil dibuat:", output_file)
-else:
-    print("[ERROR] Gagal membuat output video.")
+
+        if os.path.exists(output_path):
+            print("[SUCCESS] Output video berhasil dibuat:", output_path)
+        else:
+            print("[ERROR] Gagal membuat output video.")
+
         print("[DEBUG] STDOUT:\n", result.stdout)
         print("[DEBUG] STDERR:\n", result.stderr)
-        result.check_returncode()
         return True
+
     except subprocess.CalledProcessError as e:
         print(f"[ERROR] FFmpeg gagal: {e}")
         return False
-
-        if os.path.exists(output_file):
-    print("[SUCCESS] Output video berhasil dibuat:", output_file)
-else:
-    print("[ERROR] Gagal membuat output video.")
-
 
 def get_next_clip_start_index(log_path):
     if not os.path.exists(log_path):
