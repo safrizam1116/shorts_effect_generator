@@ -11,12 +11,19 @@ def cut_video(source_path, output_path, start_time, duration):
     try:
         command = [
             "ffmpeg",
+            "-nostdin",
+            "-hide_banner",
+            "-loglevel", "error",
             "-ss", str(start_time),
             "-i", source_path,
             "-t", str(duration),
             "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-crf", "32",
             "-c:a", "aac",
-            "-y", output_path
+            "-b:a", "64k",
+            "-y",
+            output_path
         ]
         subprocess.run(command, check=True)
         return True
