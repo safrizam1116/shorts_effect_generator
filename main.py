@@ -1,12 +1,16 @@
 import os
 import json
 import subprocess
+from flask import Flask
+import threading
 
+# ==== Konfigurasi file dan path ====
 INPUT_PATH = "input/source.mp4"
 OUTPUT_PATH = "output/clip.mp4"
 LOG_PATH = "logs/uploaded_log.json"
 CLIP_DURATION = 28  # detik
 
+# ==== Fungsi potong video ====
 def cut_video(source_path, output_path, start_time, duration):
     try:
         command = [
@@ -53,7 +57,8 @@ def ensure_directories():
     os.makedirs("output", exist_ok=True)
     os.makedirs("logs", exist_ok=True)
 
-def main():
+# ==== Fungsi utama proses potong ====
+def process_clip():
     ensure_directories()
 
     if not os.path.exists(INPUT_PATH):
@@ -70,5 +75,14 @@ def main():
     else:
         print("[GAGAL] Gagal potong, mungkin durasi sudah habis.")
 
+# ==== Flask Dummy Web Server (agar tetap hidup di Render) ====
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "🟢 Clip Generator Running"
+
+# ==== Mulai thread pemotongan saat startup ====
 if __name__ == "__main__":
-    main()
+    threading.Thread(target=process_clip).start()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
